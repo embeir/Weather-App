@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import classes from './Onama.module.css'
 import Navbar from './Navbar';
+//import CanvasJSChart from './canvasjs.react'
+//var CanvasJSChart = require('./canvasjs.react');
 
 
 const api = {
@@ -9,11 +11,11 @@ const api = {
 }
 
 
-
 const Pocetna = () => {
 
     const [query, setQuery] = useState('');
     const [weather, setWeather] = useState('');
+    const [forecast, setForecast] = useState(weather);
 
     const search = event => {
         if (event.key === 'Enter') {
@@ -22,10 +24,55 @@ const Pocetna = () => {
                 .then(res => {
                     setQuery('')
                     setWeather(res);
+                    console.log(res)
                 })
-        }
+        } 
     }
 
+   /*  const options = {
+        animationEnabled: true,
+        title: {
+            text: "PROGNOZA ZA NAREDNI PERIOD"
+        },
+        axisY: {
+            title: "°C"
+        },
+        toolTip: {
+            shared: true
+        },
+        data: [{
+            type: "spline",
+            name: "2016",
+            showInLegend: true,
+            dataPoints: [
+                forecast.daily
+
+            ]
+        },
+        {
+            type: "spline",
+            name: "2017",
+            showInLegend: true,
+            dataPoints: [
+                forecast.daily
+                
+            ]
+        }]
+    }
+  */
+
+
+    const prognoza = event => {
+
+        fetch(`${api.base}onecall?lat=${weather.coord.lat}&lon=${weather.coord.lon}&units={metric}&exclude=hourly,minutely&appid=${api.key}`)
+            .then(res => res.json())
+            .then(res => {
+                setForecast(res)
+                console.log(res)
+            })
+
+
+    }
 
     const dateBuilder = (d) => {
         let mjeseci = ["Januar", "Februar", "Mart", "April", "Maj", "Jun", "Jul", "August",
@@ -41,8 +88,6 @@ const Pocetna = () => {
         return `${dan} ${date} ${mjesec} ${godina}`
     }
 
-
-
     return (
         <div>
             <Navbar className={classes.NavigationItems} />
@@ -54,7 +99,9 @@ const Pocetna = () => {
                 placeholder="Kucaj..."
                 onChange={e => setQuery(e.target.value)}
                 value={query}
-                onKeyPress={search} />
+                onKeyPress={search}
+                className={classes.InputElement}
+            />
             {(typeof weather.main != 'undefined') ? (
                 <div>
                     <div className={classes.LokVrj}>
@@ -66,11 +113,37 @@ const Pocetna = () => {
                             {Math.round(weather.main.temp)}°C
                         </div>
                         <div className={classes.Weather} >{weather.weather[0].main}</div>
+
+                    </div>
+                    <div>
+
                     </div>
                 </div>
+
             ) : ('')}
+            <button
+                onClick={prognoza}
+                type="button" >Prognoza za narednih 5 dana
+            </button>
+
+            {(typeof forecast.current != 'undefined') ? (
+                <div>
+                    {/* <div>{Math.round(forecast.daily[0].temp.day - 273.15)} °C</div> */}
+                    <div>{forecast.daily.map(de => <div> {Math.round(de.temp.day) - 273} °C </div>)}</div>
+                    <div>{forecast.daily.map(de => <div> {Math.round(de.temp.max) - 273} °C </div>)}</div>
+
+                  {/*   <div>
+                        <CanvasJSChart 
+                            
+                            options={options} />
+                    </div>  */}
+                </div>
+            ) : ('')}
+
         </div>
     )
 }
 
 export default Pocetna;
+
+

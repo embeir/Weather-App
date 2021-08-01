@@ -6,7 +6,7 @@ const Kontakt = () => {
         <div>
             <Navbar className={classes.NavigationItems} />
             <p className={classes.Kontakt} >
-               061 031 188
+               
             </p>
         </div>
     )
